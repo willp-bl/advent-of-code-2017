@@ -29,17 +29,18 @@ fn swirly_manhattan_point(val: i32) -> Point {
     let square_sides = if length_remaining_after_power > 0 { length_remaining_after_power / square_side_length } else { 0 };
     let half_height = (square_side_length) / 2;
     let remaining_length = if square_side_length > 0 { length_remaining_after_power % square_side_length } else { 0 };
-    println!("power: {}, square_root_min: {}, remaining_length: {}, square_side_length: {}, square_sides: {}, half_height: {}", power, square_root_min, remaining_length, square_side_length, square_sides, half_height);
+//    println!("power: {}, square_root_min: {}, remaining_length: {}, square_side_length: {}, square_sides: {}, half_height: {}", power, square_root_min, remaining_length, square_side_length, square_sides, half_height);
     let x;
     if square_sides == 0 {
         x = half_height;
     } else if square_sides == 2 {
-        x = -half_height;
-    } else if (square_sides == 1 && remaining_length < half_height) ||
-        (square_sides == 3 && remaining_length > half_height) {
+        x = -half_height
+    } else if square_sides == 1 {
         x = half_height - remaining_length;
+    } else if square_sides == 3 {
+        x = remaining_length - half_height;
     } else {
-        x = -(half_height - remaining_length);
+        x = 0;
     };
 
     let y;
@@ -47,32 +48,61 @@ fn swirly_manhattan_point(val: i32) -> Point {
         y = -half_height;
     } else if square_sides == 1 {
         y = half_height;
-    } else if (square_sides == 2 && remaining_length > half_height) ||
-        (square_sides == 0 && remaining_length < half_height) {
+    } else if square_sides == 2 {
+        y = half_height - remaining_length
+    } else if square_sides == 0 {
         y = remaining_length - half_height
     } else {
-        y = remaining_length - half_height
-    };
-    println!("x: {}, y: {}", x, y);
+        y = 0
+    }
+//    println!("x: {}, y: {}", x, y);
     Point { x: x, y: y }
 }
 
 #[allow(dead_code)]
-fn swirly_manhattan2(square: i32) -> i32 {
-    // use swirly_manhattan to get coordinates,
-    // then use coordinates to calculate values around the current one
-    // by storing it in an array (ugh)
-    if square.eq(&1) { return 1; }
-    square
+fn swirly_manhattan2_get_value(max: i32) -> i32 {
+    swirly_manhattan2(1, max)
 }
 
 #[allow(dead_code)]
-fn get_next_biggest_swirly_manhattan(value: i32) -> i32 {
-    let mut square = 0;
+fn swirly_manhattan2(next: i32, max: i32) -> i32 {
+    let mut i = next;
+    let mut manhattan = vec![vec![0; 32]; 32];
+    let mut sum = 0;
+    while i <= max {
+        let point = swirly_manhattan_point(i);
+        let x = point.x + (32 / 2);
+        let y = point.y + (32 / 2);
+        sum = if i == 1 {
+            1
+        } else {
+            let mut total = 0;
+            for x2 in -1..2 {
+                for y2 in -1..2 {
+                    total += manhattan[(x + x2) as usize][(y + y2) as usize];
+                }
+            }
+            total
+        };
+        println!("sum: {}", sum);
+        manhattan[x as usize][y as usize] = sum;
+        if i == max {
+            break;
+        } else {
+            i += 1;
+        }
+    }
+    return sum;
+}
+
+#[allow(dead_code)]
+fn get_next_biggest_swirly_manhattan(max: i32) -> i32 {
     let mut result = 0;
-    while result <= value {
-        square += 1;
-        result = swirly_manhattan2(square);
+    let mut i = 0;
+    while result <= max {
+        result = swirly_manhattan2(1, i);
+        if result > max { break }
+        i += 1;
     }
     result
 }
@@ -82,7 +112,9 @@ mod tests {
     use day03::Point;
     use day03::swirly_manhattan;
     use day03::swirly_manhattan2;
+    use day03::swirly_manhattan2_get_value;
     use day03::swirly_manhattan_point;
+    use day03::get_next_biggest_swirly_manhattan;
 
     #[test]
     fn test_swirly_manhattan_1_is_0() {
@@ -125,6 +157,21 @@ mod tests {
     }
 
     #[test]
+    fn test_swirly_manhattan_point_16() {
+        assert_eq!(swirly_manhattan_point(16), Point { x: -1, y: 2 })
+    }
+
+    #[test]
+    fn test_swirly_manhattan_point_20() {
+        assert_eq!(swirly_manhattan_point(20), Point { x: -2, y: -1 })
+    }
+
+    #[test]
+    fn test_swirly_manhattan_point_5() {
+        assert_eq!(swirly_manhattan_point(5), Point { x: -1, y: 1 })
+    }
+
+    #[test]
     fn test_swirly_manhattan_point_23() {
         assert_eq!(swirly_manhattan_point(23), Point { x: 0, y: -2 })
     }
@@ -149,45 +196,45 @@ mod tests {
         assert_eq!(swirly_manhattan(1024), 31)
     }
 
-//    #[test]
-//    fn test_swirly_manhattan2_1_is_1() {
-//        assert_eq!(swirly_manhattan2(1), 1)
-//    }
-//
-//    #[test]
-//    fn test_swirly_manhattan2_2_is_1() {
-//        assert_eq!(swirly_manhattan2(2), 1)
-//    }
-//
-//    #[test]
-//    fn test_swirly_manhattan2_3_is_2() {
-//        assert_eq!(swirly_manhattan2(3), 2)
-//    }
-//
-//    #[test]
-//    fn test_swirly_manhattan2_4_is_4() {
-//        assert_eq!(swirly_manhattan2(4), 4)
-//    }
-//
-//    #[test]
-//    fn test_swirly_manhattan2_5_is_5() {
-//        assert_eq!(swirly_manhattan2(5), 5)
-//    }
-//
-//    #[test]
-//    fn test_swirly_manhattan2_6_is_10() {
-//        assert_eq!(swirly_manhattan2(6), 10)
-//    }
-//
-//    #[test]
-//    fn test_swirly_manhattan2_7_is_11() {
-//        assert_eq!(swirly_manhattan2(7), 11)
-//    }
-//
-//    #[test]
-//    fn test_swirly_manhattan2_21_is_362() {
-//        assert_eq!(swirly_manhattan2(21), 362)
-//    }
+    #[test]
+    fn test_swirly_manhattan2_1_is_1() {
+        assert_eq!(swirly_manhattan2_get_value(1), 1)
+    }
+
+    #[test]
+    fn test_swirly_manhattan2_2_is_1() {
+        assert_eq!(swirly_manhattan2_get_value(2), 1)
+    }
+
+    #[test]
+    fn test_swirly_manhattan2_3_is_2() {
+        assert_eq!(swirly_manhattan2_get_value(3), 2)
+    }
+
+    #[test]
+    fn test_swirly_manhattan2_4_is_4() {
+        assert_eq!(swirly_manhattan2_get_value(4), 4)
+    }
+
+    #[test]
+    fn test_swirly_manhattan2_5_is_5() {
+        assert_eq!(swirly_manhattan2_get_value(5), 5)
+    }
+
+    #[test]
+    fn test_swirly_manhattan2_6_is_10() {
+        assert_eq!(swirly_manhattan2_get_value(6), 10)
+    }
+
+    #[test]
+    fn test_swirly_manhattan2_7_is_11() {
+        assert_eq!(swirly_manhattan2_get_value(7), 11)
+    }
+
+    #[test]
+    fn test_swirly_manhattan2_21_is_362() {
+        assert_eq!(swirly_manhattan2_get_value(21), 362)
+    }
 
     // FIXME: delete before committing
     #[test]
