@@ -56,11 +56,9 @@ fn process(data: &str) -> RegisterResult {
         }
     }
     let mut max_val: i32 = 0;
-    let mut max_reg_name = "";
     for reg in registers.keys() {
         if registers.get(reg).unwrap() > &max_val {
             max_val = *registers.get(reg).unwrap();
-            max_reg_name = reg;
         }
     }
     RegisterResult { max_at_end: max_val, max_at_anytime: max_at_anytime }

@@ -111,10 +111,8 @@ fn get_next_biggest_swirly_manhattan(max: i32) -> i32 {
 mod tests {
     use day03::Point;
     use day03::swirly_manhattan;
-    use day03::swirly_manhattan2;
     use day03::swirly_manhattan2_get_value;
     use day03::swirly_manhattan_point;
-    use day03::get_next_biggest_swirly_manhattan;
 
     #[test]
     fn test_swirly_manhattan_1_is_0() {
