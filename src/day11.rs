@@ -46,7 +46,6 @@ fn hexed(val: &str) -> HexedResult {
 
 #[cfg(test)]
 mod tests {
-    use day11::HexedResult;
     use day11::hexed;
 
     #[test]
