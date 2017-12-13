@@ -4,8 +4,8 @@ use std::io;
 use std::io::Write;
 
 #[allow(dead_code)]
-fn function(val: i32) -> i32 {
-    val
+fn function(val: &str) -> i32 {
+    val.len() as i32
 }
 
 #[cfg(test)]
@@ -14,7 +14,8 @@ mod tests {
 
     #[test]
     fn test_new() {
-        assert_eq!(function(1), 1)
+        let input = "1";
+        assert_eq!(function(input), 1)
     }
 
 }
