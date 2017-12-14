@@ -28,40 +28,41 @@ fn parse_scan(input: &str) -> HashMap<i32, i32> {
 
 #[allow(dead_code)]
 fn calc_trip_severity(input: &str) -> i32 {
-    _calc_trip_severity(input, 0)
+    let (result, _) = _calc_trip_severity(input, 0);
+    result
 }
 
 #[allow(dead_code)]
 fn calc_safe_trip_start_time(input: &str) -> i32 {
     let mut offset = 0;
     loop {
-        let result = _calc_trip_severity(input, offset);
-        println!("offset: {}, result: {}", offset, result);
-        if result == 0 {
+        let (result, caught) = _calc_trip_severity(input, offset);
+        if result == 0 && !caught {
             break;
         } else {
             offset += 1;
         }
-        if offset > 500000 { break }
+        if offset > 1000000 { break }
     }
     offset
 }
 
 #[allow(dead_code)]
-fn _calc_trip_severity(input: &str, start_picosecond: i32) -> i32 {
+fn _calc_trip_severity(input: &str, start_picosecond: i32) -> (i32, bool) {
     let scan = parse_scan(input);
     let mut severity = 0;
-    let print = true;
+    let print = false;
     let max = *scan.keys().max().unwrap() + 1;
+    let mut caught = false;
     for picosecond in start_picosecond..max + start_picosecond {
         let layer = &picosecond - start_picosecond;
         match scan.get(&layer) {
             Some(depth) => {
                 if print { println!("picosecond: {}, layer: {}, depth: {}", picosecond, layer, depth); }
                 if *depth != 0 {
-                    let up = (picosecond / (depth - 1)) % 2 == 1;
+                    let right_to_left = (picosecond / (depth - 1)) % 2 == 1;
                     let d2;
-                    if up {
+                    if right_to_left {
                         d2 = depth - 1 - picosecond % (depth - 1);
                     } else {
                         d2 = picosecond % (depth - 1);
@@ -75,8 +76,8 @@ fn _calc_trip_severity(input: &str, start_picosecond: i32) -> i32 {
                             }
                         }
                     }
-
                     if d2 == 0 {
+                        caught = true;
                         severity += depth * layer;
                     }
                 } else {
@@ -87,7 +88,7 @@ fn _calc_trip_severity(input: &str, start_picosecond: i32) -> i32 {
         }
         if print { println!(); }
     }
-    severity
+    (severity, caught)
 }
 
 #[cfg(test)]
@@ -105,7 +106,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_calc_safe_trip_start_time_1() {
         let input = "0: 3
 1: 2
@@ -113,6 +113,5 @@ mod tests {
 6: 4";
         assert_eq!(calc_safe_trip_start_time(input), 10)
     }
-
 
 }
